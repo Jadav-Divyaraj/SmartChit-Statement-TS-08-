@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VanAdhikar Chain — Forest Rights Ledger | TS-08</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tiro+Devanagari+Hindi:ital@0;1&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+
+<div class="topbar">
+    <div class="topbar-brand">
+        <div class="topbar-icon">🌿</div>
+        <div>
+            <div class="brand-name">VanAdhikar</div>
+            <div class="brand-sub">Forest Rights Ledger · Gujarat</div>
+        </div>
+    </div>
+    <div class="topbar-right">
+        <div class="network-badge" id="networkBadge">🔷 Polygon Amoy</div>
+        <button class="wallet-btn" id="walletBtn">
+            <div class="wallet-indicator" id="walletDot"></div>
+            <span id="walletBtnText">Connect MetaMask</span>
+        </button>
+    </div>
+</div>
+
+<div class="app-layout">
+    <nav class="sidebar">
+        <div class="sidebar-section">
+            <div class="sidebar-label">Main</div>
+            <button class="nav-item active" data-page="dashboard"><span class="nav-icon">📊</span> Dashboard</button>
+            <button class="nav-item" data-page="ledger"><span class="nav-icon">📋</span> Entitlement Ledger</button>
+            <button class="nav-item" data-page="payments"><span class="nav-icon">💸</span> Payment Recording</button>
+            <button class="nav-item" data-page="underpayment"><span class="nav-icon">⚠️</span> Underpayment Alerts</button>
+        </div>
+        <div class="nav-divider"></div>
+        <div class="sidebar-section">
+            <div class="sidebar-label">Family Portal</div>
+            <button class="nav-item" data-page="familyview"><span class="nav-icon">📱</span> Family QR View</button>
+            <button class="nav-item" data-page="dispute"><span class="nav-icon">📝</span> File Dispute</button>
+            <button class="nav-item" data-page="dtdo"><span class="nav-icon">⚖️</span> DTDO Adjudication</button>
+        </div>
+        <div class="nav-divider"></div>
+        <div class="sidebar-section">
+            <div class="sidebar-label">Tools</div>
+            <button class="nav-item" data-page="immutability"><span class="nav-icon">🔒</span> Immutability Proof</button>
+            <button class="nav-item" data-page="cooperative"><span class="nav-icon">🏛️</span> Cooperative Dashboard</button>
+        </div>
+        <div class="nav-divider"></div>
+        <div class="sidebar-section">
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="demo-banner" id="demoBanner">
+            🖥️ <strong>Demo Mode</strong> — Data saved in browser storage. Connect MetaMask for live Polygon Amoy.
+        </div>
+
+        <!-- DASHBOARD -->
+        <div class="page active" id="page-dashboard">
+            <div class="page-header">
+                <div class="page-title">Dashboard</div>
+                <div class="gujarati-title">મુખ્ય ડેશબોર્ડ — TS-08 VanAdhikar</div>
+            </div>
+            <div class="stat-grid">
+                <div class="stat-card"><div class="stat-label">Total Families</div><div class="stat-value" id="statFamilies">3</div><div class="stat-sub">Enrolled</div></div>
+                <div class="stat-card gold"><div class="stat-label">Total Entitlement</div><div class="stat-value" id="statEntitled">3000 POL</div><div class="stat-sub">This season</div></div>
+                <div class="stat-card danger"><div class="stat-label">Underpayments</div><div class="stat-value" id="statUnderpay">2</div><div class="stat-sub">Families affected</div></div>
+                <div class="stat-card"><div class="stat-label">Open Disputes</div><div class="stat-value" id="statDisputes">0</div><div class="stat-sub">Routed to DTDO</div></div>
+            </div>
+            <div class="card">
+                <div class="card-header"><h3>🔗 Blockchain Status</h3></div>
+                <div class="card-body">
+                    <div class="proof-box">
+                        <div class="proof-line"><span class="proof-key">Network</span><span class="proof-val">Polygon Amoy Testnet (Chain 80002)</span></div>
+                        <div class="proof-line"><span class="proof-key">Contract</span><span class="proof-val" id="dashContract">0x6811af16b7C3d4B298b9D7D078508a2Fb2aE9559</span></div>
+                        <div class="proof-line"><span class="proof-key">Delete Function</span><span class="proof-val">❌ NONE — Immutable</span></div>
+                        <div class="proof-line"><span class="proof-key">Edit Function</span><span class="proof-val">❌ NONE — Immutable</span></div>
+                        <div class="proof-line"><span class="proof-key">Audit Trail</span><span class="proof-val">✅ Every payment timestamped with officer address</span></div>
+                        <div class="proof-line"><span class="proof-key">Polygonscan</span><span class="proof-val"><a href="https://amoy.polygonscan.com/address/0x6811af16b7C3d4B298b9D7D078508a2Fb2aE9559" target="_blank" style="color:#52b788;">View Contract ↗</a></span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ENTITLEMENT LEDGER -->
+        <div class="page" id="page-ledger">
+            <div class="page-header">
+                <div class="page-title">Immutable Entitlement Ledger</div>
+                <div class="gujarati-title">અધિકાર ખાતાવહી — બ્લોકચેન પ્રમાણ</div>
+                <p class="page-subtitle">✅ F1: Produce type, quantity, value per season per family — Immutable on blockchain</p>
+            </div>
+            <div class="card">
+                <div class="card-header"><h3>Set Entitlement (Forest Officer)</h3></div>
+                <div class="card-body">
+                    <div class="form-grid-3">
+                        <div class="form-group"><label class="form-label">Family Wallet (0x…)</label><input class="form-input" id="entWallet" placeholder="0x58AA48…"></div>
+                        <div class="form-group"><label class="form-label">Family Name</label><input class="form-input" id="entName" placeholder="Family Name"></div>
+                        <div class="form-group"><label class="form-label">Village</label><input class="form-input" id="entVillage" placeholder="Village"></div>
+                        <div class="form-group"><label class="form-label">Produce Type</label><select class="form-select" id="entProduce"><option>Tendu Leaves</option><option>Bamboo</option><option>Mahua Flowers</option><option>Amla</option></select></div>
+                        <div class="form-group"><label class="form-label">Quantity (kg)</label><input class="form-input" id="entQty" type="number" placeholder="1000"></div>
+                        <div class="form-group"><label class="form-label">Entitlement (POL)</label><input class="form-input" id="entPOL" type="number" placeholder="1000" step="any"></div>
+                    </div>
+                    <button class="btn btn-primary" id="recordEntitlementBtn" onclick="recordEntitlement()">🔗 Record on Blockchain</button>
+                    <div id="entResult" style="display:none; margin-top:1rem;"></div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header"><h3>Entitlement Ledger</h3><button class="btn btn-sm btn-outline" onclick="refreshLedger()">↻ Refresh</button></div>
+                <div class="card-body" style="padding:0;">
+                    <table class="ledger-table">
+                        <thead><tr><th>Wallet</th><th>Name</th><th>Produce</th><th>Qty(kg)</th><th>Entitled(POL)</th><th>Received(POL)</th><th>Shortfall</th><th>Status / QR</th></tr></thead>
+                        <tbody id="ledgerBody"><tr><td colspan="8" style="text-align:center;padding:16px;">Loading…</tbody></table>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAYMENT RECORDING -->
+        <div class="page" id="page-payments">
+            <div class="page-header">
+                <div class="page-title">Payment Event Recording</div>
+                <div class="gujarati-title">ચૂકવણી નોંધ — સહકારી મેનેજર</div>
+                <p class="page-subtitle">✅ F2: Timestamp, Amount, Authorising Officer — permanently on blockchain</p>
+            </div>
+            <div class="card">
+                <div class="card-header"><h3>Record Payment</h3></div>
+                <div class="card-body">
+                    <div class="form-grid">
+                        <div class="form-group"><label class="form-label">Family Wallet</label><input class="form-input" id="payWallet" placeholder="0x…"></div>
+                        <div class="form-group"><label class="form-label">Amount (POL)</label><input class="form-input" id="payAmount" type="number" placeholder="500" step="any"></div>
+                        <div class="form-group"><label class="form-label">Note (optional)</label><input class="form-input" id="payNote" placeholder="e.g. Kharif 2024 Q1"></div>
+                    </div>
+                    <button class="btn btn-primary" id="recordPaymentBtn" onclick="sendPayment()">💸 Send POL via MetaMask</button>
+                    <div id="payResult" style="display:none; margin-top:1rem;"></div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header"><h3>📜 Payment History — All Transactions</h3><button class="btn btn-sm btn-outline" onclick="loadPaymentHistory()">↻ Refresh</button></div>
+                <div class="card-body" style="padding:0;">
+                    <table class="ledger-table">
+                        <thead><tr><th>Family</th><th>Amount (POL)</th><th>Officer</th><th>Note</th><th>Timestamp</th><th>Tx Hash</th></tr></thead>
+                        <tbody id="paymentHistoryBody"><tr><td colspan="6" style="text-align:center;padding:16px;color:#64748b;">No payments yet</tbody></table>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- UNDERPAYMENT ALERTS -->
+        <div class="page" id="page-underpayment">
+            <div class="page-header">
+                <div class="page-title">Underpayment Auto-Detection</div>
+                <div class="gujarati-title">ઓછી ચૂકવણી શોધ — ઓટો</div>
+                <p class="page-subtitle">✅ F3: Contract compares entitlement vs payment ledger every transaction</p>
+            </div>
+            <div class="card">
+                <div class="card-header"><h3>Underpayment Report</h3><button class="btn btn-sm btn-outline" onclick="loadUnderpaymentData()">↻ Refresh</button></div>
+                <div class="card-body" style="padding:0;">
+                    <table class="ledger-table">
+                        <thead><tr><th>Wallet</th><th>Name</th><th>Entitled</th><th>Received</th><th>Shortfall</th><th>Action</th></tr></thead>
+                        <tbody id="underpayBody"><tr><td colspan="6" style="text-align:center;padding:16px;">Loading…</tbody></table>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- FAMILY QR VIEW -->
+        <div class="page" id="page-familyview">
+            <div class="page-header">
+                <div class="page-title">Family Portal — QR Scan View</div>
+                <div class="gujarati-title">પરિવાર પોર્ટલ — QR સ્કેન</div>
+                <p class="page-subtitle">✅ F4: QR opens tribal portal in Gujarati with voice — no blockchain knowledge needed</p>
+            </div>
+            <div class="card">
+                <div class="card-header"><h3>Look Up Family / Generate QR</h3></div>
+                <div class="card-body">
+                    <div class="form-group"><label class="form-label">Family Wallet Address</label><input class="form-input" id="qrFamilyWallet" placeholder="0x58AA48529a4f0c72F3DA3d5b47e3e55dc69e8621"></div>
+                    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                        <button class="btn btn-primary" onclick="loadFamilyView()">🔍 Load Data</button>
+                        <button class="btn btn-outline" onclick="openQRModal()">📱 Generate QR Card</button>
+                        <button class="btn btn-outline" onclick="speakFamilyData()">🔊 Gujarati Voice</button>
+                    </div>
+                </div>
+            </div>
+            <div id="familyViewCard" style="display:none;" class="card">
+                <div class="card-header"><h3>Family Details</h3><span style="font-family:'Tiro Devanagari Hindi',serif;font-size:14px;color:#52b788;" id="familyGujaratiText"></span></div>
+                <div class="card-body">
+                    <div class="proof-box">
+                        <div class="proof-line"><span class="proof-key">Family Name</span><span class="proof-val" id="fvName">—</span></div>
+                        <div class="proof-line"><span class="proof-key">Village</span><span class="proof-val" id="fvVillage">—</span></div>
+                        <div class="proof-line"><span class="proof-key">Produce Type</span><span class="proof-val" id="fvProduce">—</span></div>
+                        <div class="proof-line"><span class="proof-key">Quantity (kg)</span><span class="proof-val" id="fvQuantity">—</span></div>
+                        <div class="proof-line"><span class="proof-key">Entitled (POL)</span><span class="proof-val" id="fvEntitled">—</span></div>
+                        <div class="proof-line"><span class="proof-key">Received (POL)</span><span class="proof-val" id="fvReceived">—</span></div>
+                        <div class="proof-line"><span class="proof-key">Shortfall</span><span class="proof-val" id="fvShortfall">—</span></div>
+                        <div class="proof-line"><span class="proof-key">Status</span><span class="proof-val" id="fvStatus">—</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DISPUTE -->
+        <div class="page" id="page-dispute">
+            <div class="page-header">
+                <div class="page-title">File Dispute</div>
+                <div class="gujarati-title">ફરિયાદ નોંધો — ઓફિસ વિના</div>
+                <p class="page-subtitle">✅ F5: Voice/Photo Evidence | ✅ F6: Auto-routed to DTDO</p>
+            </div>
+            <div class="card">
+                <div class="card-header"><h3>Dispute Form — No Office Visit Required</h3></div>
+                <div class="card-body">
+                    <div class="form-grid">
+                        <div class="form-group"><label class="form-label">Family Wallet</label><input class="form-input" id="dispWallet" placeholder="0x…"></div>
+                        <div class="form-group"><label class="form-label">Dispute Type</label><select class="form-select" id="dispType"><option>Underpayment</option><option>No Payment</option><option>Wrong Entitlement</option><option>Wrong Produce Recorded</option></select></div>
+                        <div class="form-group"><label class="form-label">Entitled (POL)</label><input class="form-input" id="dispEntitled" type="number" placeholder="1000"></div>
+                        <div class="form-group"><label class="form-label">Received (POL)</label><input class="form-input" id="dispReceived" type="number" placeholder="500"></div>
+                    </div>
+                    <div class="form-group"><label class="form-label">🎤 Voice Evidence (Gujarati)</label><div style="display:flex;align-items:center;gap:12px;"><button class="btn btn-outline" onclick="startVoiceRecording()">🎤 Record Voice (5s)</button><span id="voiceStatus" style="font-size:12px;color:#64748b;"></span></div></div>
+                    <div class="form-group"><label class="form-label">📸 Photo Evidence</label><input type="file" id="photoInput" accept="image/*"></div>
+                    <div class="form-group"><label class="form-label">Description</label><textarea class="form-input" id="dispDesc" rows="3"></textarea></div>
+                    <button class="btn btn-danger" id="submitDisputeBtn" onclick="submitDispute()">📤 Submit → Auto-Routed to DTDO</button>
+                    <div id="dispResult" style="display:none; margin-top:1rem;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DTDO -->
+        <div class="page" id="page-dtdo">
+            <div class="page-header">
+                <div class="page-title">DTDO Adjudication Portal</div>
+                <div class="gujarati-title">DTDO — ઉકેલ પોર્ટલ</div>
+                <p class="page-subtitle">✅ F7: Dispute resolution workflow with status tracking</p>
+            </div>
+            <div class="card">
+                <div class="card-header"><h3>Dispute Queue — Auto-Routed</h3><button class="btn btn-sm btn-outline" onclick="loadDTDOData()">↻ Refresh</button></div>
+                <div class="card-body" style="padding:0;">
+                    <table class="ledger-table">
+                        <thead><tr><th>ID</th><th>Family</th><th>Type</th><th>Shortfall</th><th>Evidence</th><th>Status</th><th>Action</th></tr></thead>
+                        <tbody id="dtdoBody"><tr><td colspan="7" style="text-align:center;padding:16px;color:#64748b;">No disputes yet</tbody></table>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- IMMUTABILITY -->
+        <div class="page" id="page-immutability">
+            <div class="page-header"><div class="page-title">Immutability Proof</div><div class="gujarati-title">અપરિવર્તનીયતા — બ્લોકચેન</div></div>
+            <div class="card">
+                <div class="card-header"><h3>🔒 Immutability Test</h3></div>
+                <div class="card-body">
+                    <div class="proof-box">
+                        <div class="proof-line"><span class="proof-key">delete()</span><span class="proof-val">❌ Does NOT exist</span></div>
+                        <div class="proof-line"><span class="proof-key">editRecord()</span><span class="proof-val">❌ Does NOT exist</span></div>
+                        <div class="proof-line"><span class="proof-key">✓ Immutable</span><span class="proof-val">Records permanent — no admin key can alter</span></div>
+                    </div>
+                    <button class="btn btn-danger" style="width:100%;margin-top:1rem;" onclick="runImmutabilityTest()">⚠ SIMULATE FRAUDULENT RECORD CHANGE</button>
+                    <div id="immutTestResult" style="display:none; margin-top:1rem;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- COOPERATIVE DASHBOARD -->
+        <div class="page" id="page-cooperative">
+            <div class="page-header">
+                <div class="page-title">Cooperative Payment Compliance</div>
+                <div class="gujarati-title">સહકારી ચૂકવણી — અનુપાલન</div>
+                <p class="page-subtitle">✅ F8: Cooperative-level payment compliance dashboard</p>
+            </div>
+            <div id="coopDashboard"><p style="color:#64748b;">Loading…</p></div>
+        </div>
+    </main>
+</div>
+
+<!-- QR MODAL -->
+<div class="modal-overlay" id="qrModal">
+    <div class="modal-box">
+        <button class="modal-close" onclick="closeQRModal()">✕</button>
+        <div class="modal-title">📱 Tribal QR Card</div>
+        <div id="qrcode" style="display:flex;justify-content:center;margin:1rem 0;"></div>
+        <p style="font-size:11px;color:#94a3b8;text-align:center;">Opens family.html — Gujarati · Voice readout</p>
+    </div>
+</div>
+
+<div id="toast"></div>
+<script src="app.js"></script>
+</body>
+</html>

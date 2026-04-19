@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>VanAdhikar — તમારો હક્ક</title>
+<link href="https://fonts.googleapis.com/css2?family=Tiro+Devanagari+Hindi:ital@0;1&family=Noto+Sans+Gujarati:wght@400;600;700&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--green:#2d6a4f;--leaf:#52b788;--pale:#f5f0e8;--red:#c1121f;--amber:#d4a017;--dark:#0a1a0f;--text:#1a1a1a;--muted:#5a5a5a}
+body{font-family:'Noto Sans Gujarati','Space Grotesk',sans-serif;background:var(--pale);color:var(--text);min-height:100vh}
+.header{background:var(--dark);padding:14px 20px;border-bottom:3px solid var(--leaf);position:sticky;top:0;z-index:100}
+.header-inner{max-width:600px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+.logo{font-size:22px;font-weight:700;color:#fff}.logo span{color:var(--leaf)}
+.header-badge{font-size:11px;background:rgba(82,183,136,0.15);border:1px solid var(--leaf);color:var(--leaf);padding:4px 12px;border-radius:20px}
+.lang-bar{display:flex;gap:8px;justify-content:center;padding:14px 20px 0;max-width:600px;margin:0 auto}
+.lang-btn{background:#fff;border:1px solid #e2e8f0;color:#475569;padding:8px 18px;border-radius:20px;font-size:14px;cursor:pointer;font-family:inherit}
+.lang-btn.on{background:var(--green);color:#fff;border-color:var(--green)}
+.main{max-width:600px;margin:0 auto;padding:20px 16px 80px}
+.status-hero{border-radius:20px;padding:28px 24px;margin-bottom:20px;text-align:center;position:relative}
+.status-hero.paid{background:linear-gradient(135deg,#1a3a22,#2d6a4f)}
+.status-hero.shortfall{background:linear-gradient(135deg,#3a0a0a,#7f1d1d)}
+.status-hero.loading{background:linear-gradient(135deg,#1a1a2e,#2a2a4e)}
+.status-icon{font-size:72px;margin-bottom:12px;display:block;animation:float 3s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.status-name{font-size:26px;font-weight:700;color:#fff;margin-bottom:4px;font-family:'Tiro Devanagari Hindi',serif}
+.status-village{font-size:14px;color:rgba(255,255,255,0.65);margin-bottom:16px}
+.status-msg{font-size:15px;color:rgba(255,255,255,0.9);line-height:1.5;font-family:'Tiro Devanagari Hindi',serif}
+.voice-btn{display:flex;align-items:center;justify-content:center;gap:10px;background:rgba(255,255,255,0.15);border:2px solid rgba(255,255,255,0.4);color:#fff;padding:12px 24px;border-radius:40px;font-size:16px;cursor:pointer;margin:16px auto 0;font-family:inherit;transition:all 0.2s;width:auto}
+.voice-btn.speaking{background:rgba(255,255,255,0.3);animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+.amount-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+.amount-card{background:#fff;border-radius:16px;padding:20px 16px;border:1px solid rgba(45,106,79,0.15);text-align:center}
+.amount-card.shortfall-card{border-top:4px solid var(--red)}
+.amount-card.entitled-card{border-top:4px solid var(--leaf)}
+.amount-card.paid-card{border-top:4px solid var(--green)}
+.amount-icon{font-size:28px;margin-bottom:8px}
+.amount-label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;font-family:'Space Grotesk',sans-serif}
+.amount-inr{font-size:24px;font-weight:700;color:var(--text);line-height:1}
+.amount-pol{font-size:12px;color:var(--muted);margin-top:4px;font-family:'Space Grotesk',sans-serif}
+.amount-inr.red{color:var(--red)}.amount-inr.green{color:var(--green)}
+.progress-card{background:#fff;border-radius:16px;padding:20px;margin-bottom:20px;border:1px solid rgba(45,106,79,0.15)}
+.progress-label{display:flex;justify-content:space-between;margin-bottom:10px;font-size:13px;font-family:'Space Grotesk',sans-serif}
+.progress-bar-bg{background:#e2e8f0;border-radius:20px;height:16px;overflow:hidden}
+.progress-bar-fill{height:100%;border-radius:20px;transition:width 1.2s ease;background:linear-gradient(90deg,var(--red),var(--amber),var(--leaf))}
+.progress-pct{text-align:center;font-size:13px;color:var(--muted);margin-top:8px;font-family:'Space Grotesk',sans-serif}
+.produce-card{background:#fff;border-radius:16px;padding:16px 20px;margin-bottom:20px;border:1px solid rgba(45,106,79,0.15);display:flex;align-items:center;gap:16px}
+.produce-icon{font-size:40px;flex-shrink:0}
+.produce-name{font-size:18px;font-weight:700;color:var(--text)}
+.produce-qty{font-size:14px;color:var(--muted);margin-top:2px;font-family:'Space Grotesk',sans-serif}
+.section-title{font-size:16px;font-weight:700;color:var(--dark);margin-bottom:12px;font-family:'Tiro Devanagari Hindi',serif;display:flex;align-items:center;gap:8px}
+.history-card{background:#fff;border-radius:16px;overflow:hidden;margin-bottom:20px;border:1px solid rgba(45,106,79,0.15)}
+.history-row{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid #e2e8f0}
+.history-row:last-child{border-bottom:none}
+.history-season{font-size:12px;color:var(--muted);font-family:'Space Grotesk',sans-serif}
+.history-date{font-size:13px;color:var(--text);margin-top:2px;font-family:'Space Grotesk',sans-serif}
+.history-inr{font-size:18px;font-weight:700;color:var(--green)}
+.history-pol{font-size:11px;color:var(--muted);font-family:'Space Grotesk',sans-serif}
+.history-officer{font-size:11px;color:var(--muted);font-family:'Space Grotesk',sans-serif;margin-top:2px}
+.no-history{padding:20px;text-align:center;color:var(--muted);font-size:14px}
+.qr-section{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+.qr-box{background:#fff;border-radius:16px;padding:16px;text-align:center;border:1px solid rgba(45,106,79,0.15)}
+.qr-box-title{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;font-family:'Space Grotesk',sans-serif}
+.qr-canvas{display:inline-block;background:#fff;padding:8px;border-radius:8px}
+.copy-btn{background:#f1f5f9;border:none;padding:6px 14px;border-radius:6px;font-size:12px;cursor:pointer;margin-top:8px;font-family:'Space Grotesk',sans-serif}
+.dispute-btn{background:var(--red);color:#fff;border:none;padding:18px 24px;border-radius:14px;font-size:17px;font-weight:700;cursor:pointer;width:100%;margin-bottom:20px;display:flex;align-items:center;justify-content:center;gap:10px;transition:background 0.2s;font-family:'Tiro Devanagari Hindi',serif}
+.dispute-btn:hover{background:#7f1d1d}
+.alert-underpay{background:#fef3c7;border-left:4px solid #f59e0b;padding:16px;border-radius:12px;margin-bottom:20px;display:none;align-items:flex-start;gap:12px}
+.alert-underpay.show{display:flex}
+.alert-underpay-icon{font-size:24px;flex-shrink:0}
+.alert-underpay-title{font-size:16px;font-weight:700;color:#92400e;font-family:'Tiro Devanagari Hindi',serif}
+.alert-underpay-text{font-size:13px;color:#92400e;margin-top:4px;font-family:'Space Grotesk',sans-serif}
+.loading-overlay{position:fixed;inset:0;background:var(--pale);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:200;gap:16px}
+.loading-spinner{width:48px;height:48px;border:4px solid rgba(82,183,136,0.3);border-top-color:var(--leaf);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-overlay.hidden{display:none}
+.proof-section{background:var(--dark);border-radius:14px;padding:16px;margin-bottom:20px}
+.proof-title{font-size:12px;color:var(--leaf);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;font-family:'Space Grotesk',sans-serif}
+.proof-row{display:flex;gap:10px;padding:4px 0;font-size:11px;font-family:'Space Grotesk',monospace}
+.proof-key{color:var(--leaf);min-width:110px;flex-shrink:0}
+.proof-val{color:#e2e8f0;word-break:break-all}
+#toast{position:fixed;bottom:20px;right:16px;background:var(--dark);color:#fff;padding:12px 18px;border-radius:10px;font-size:14px;z-index:9999;transform:translateY(100px);opacity:0;transition:all 0.3s;border-left:4px solid var(--leaf)}
+#toast.show{transform:translateY(0);opacity:1}
+@media(max-width:400px){.amount-grid{grid-template-columns:1fr}.qr-section{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner"></div>
+    <div style="font-size:16px;color:#5a5a5a;font-family:'Noto Sans Gujarati',sans-serif;text-align:center">
+        બ્લોકચેન માંથી ડેટા લઈ રહ્યા છીએ…<br>
+        <span style="font-size:13px;color:#888;">Loading from blockchain…</span>
+    </div>
+</div>
+
+<div class="header">
+    <div class="header-inner">
+        <div class="logo">Van<span>Adhikar</span> 🌿</div>
+        <div class="header-badge">🌳 તમારો હક્ક</div>
+    </div>
+</div>
+
+<div class="lang-bar">
+    <button class="lang-btn on" onclick="setLang('gu')">ગુજરાતી</button>
+    <button class="lang-btn" onclick="setLang('hi')">हिन्दी</button>
+    <button class="lang-btn" onclick="setLang('en')">English</button>
+</div>
+
+<div class="main">
+
+    <div class="status-hero loading" id="statusHero">
+        <span class="status-icon" id="statusIcon">⏳</span>
+        <div class="status-name" id="statusName">Loading…</div>
+        <div class="status-village" id="statusVillage">—</div>
+        <div class="status-msg" id="statusMsg">ડેટા લોડ થઈ રહ્યો છે…</div>
+        <button class="voice-btn" id="voiceBtn" onclick="speakData()">
+            🔊 <span id="voiceBtnText">સાંભળો</span>
+        </button>
+    </div>
+
+    <div class="alert-underpay" id="underpayAlert">
+        <div class="alert-underpay-icon">⚠️</div>
+        <div>
+            <div class="alert-underpay-title" id="alertTitle">ઓછું ચૂકવણ</div>
+            <div class="alert-underpay-text" id="alertText">ફરિયાદ કરો →</div>
+        </div>
+    </div>
+
+    <div class="amount-grid">
+        <div class="amount-card entitled-card">
+            <div class="amount-icon">📜</div>
+            <div class="amount-label" id="labelEntitled">હક્ક</div>
+            <div class="amount-inr green" id="amountEntitled">—</div>
+            <div class="amount-pol" id="polEntitled">—</div>
+        </div>
+        <div class="amount-card paid-card">
+            <div class="amount-icon">✅</div>
+            <div class="amount-label" id="labelReceived">મળ્યું</div>
+            <div class="amount-inr green" id="amountReceived">—</div>
+            <div class="amount-pol" id="polReceived">—</div>
+        </div>
+    </div>
+
+    <div class="progress-card">
+        <div class="progress-label">
+            <span id="progressLabelLeft">ચૂકવણ</span>
+            <span id="progressLabelRight">0%</span>
+        </div>
+        <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="progressBar" style="width:0%"></div>
+        </div>
+        <div class="progress-pct" id="progressPct">—</div>
+    </div>
+
+    <div class="amount-grid" id="shortfallGrid" style="display:none;">
+        <div class="amount-card shortfall-card" style="grid-column:1/-1;">
+            <div class="amount-icon">🚨</div>
+            <div class="amount-label" id="labelShortfall">ઓછી રકમ</div>
+            <div class="amount-inr red" id="amountShortfall">—</div>
+            <div class="amount-pol" id="polShortfall">—</div>
+        </div>
+    </div>
+
+    <div class="produce-card">
+        <div class="produce-icon" id="produceIcon">🌿</div>
+        <div>
+            <div class="produce-name" id="produceName">—</div>
+            <div class="produce-qty" id="produceQty">—</div>
+        </div>
+    </div>
+
+    <div class="section-title"><span>📜</span><span id="historyTitle">ચૂકવણ ઇતિહાસ</span></div>
+    <div class="history-card" id="historyCard">
+        <div class="no-history">ઇતિહાસ લોડ…</div>
+    </div>
+
+    <div class="proof-section">
+        <div class="proof-title">🔗 Blockchain Verification</div>
+        <div class="proof-row"><span class="proof-key">Network</span><span class="proof-val">Polygon Amoy (No MetaMask needed to view)</span></div>
+        <div class="proof-row"><span class="proof-key">Contract</span><span class="proof-val" id="proofContract">0x31a1df…EB8</span></div>
+        <div class="proof-row"><span class="proof-key">Record</span><span class="proof-val">Permanent — cannot be deleted or changed</span></div>
+        <div class="proof-row"><span class="proof-key">Verify</span><span class="proof-val"><a id="polygonscanLink" href="#" target="_blank" style="color:#52b788;">Polygonscan ↗</a></span></div>
+    </div>
+
+    <div class="section-title"><span>📱</span><span id="qrTitle">QR Codes</span></div>
+    <div class="qr-section">
+        <div class="qr-box">
+            <div class="qr-box-title" id="qrVerifTitle">Blockchain Verify</div>
+            <div id="qrVerification" class="qr-canvas"></div>
+            <button class="copy-btn" onclick="copyLink('verif')">📋 Copy</button>
+        </div>
+        <div class="qr-box">
+            <div class="qr-box-title" id="qrInvoiceTitle">Family Invoice</div>
+            <div id="qrInvoice" class="qr-canvas"></div>
+            <button class="copy-btn" onclick="copyLink('invoice')">📋 Copy</button>
+        </div>
+    </div>
+
+    <button class="dispute-btn" onclick="openDispute()">
+        ⚠️ <span id="disputeBtnText">DTDO ને ફરિયાદ કરો</span>
+    </button>
+
+</div>
+<div id="toast"></div>
+
+<script>
+const CONTRACT_ADDRESS="0x31a1df9650Ef95f03Bf6AB73f456C5d92C449EB8";
+const AMOY_RPC="https://rpc-amoy.polygon.technology/";
+const POL_TO_INR=45;
+const ABI=["function getFamilyDetails(address) external view returns (string,string,uint256,uint256,uint256,bool,bool)","function getPaymentHistory(address) external view returns (uint256[],uint256[],address[],uint256[])"];
+const LANG={
+    gu:{entitled:"હક્ક",received:"મળ્યું",shortfall:"ઓછી રકમ",historyTitle:"ચૂકવણ ઇતિહાસ",paidMsg:"✅ સ્વાગત! સંપૂર્ણ ચૂકવણ થઈ ગઈ છે.",underpaidMsg:"⚠️ ચેતવણી! ઓછી ચૂકવણ. ફરિયાદ કરો.",voiceBtn:"સાંભળો",alertTitle:"ઓછું ચૂકવણ",alertText:"ફરિયાદ કરો →",progressLabel:"ચૂકવણ",qrVerif:"Blockchain",qrInvoice:"Invoice",disputeBtn:"DTDO ને ફરિયાદ કરો",noHistory:"કોઈ ચૂકવણ નથી",season:"સીઝન"},
+    hi:{entitled:"हक",received:"मिला",shortfall:"कमी",historyTitle:"भुगतान इतिहास",paidMsg:"✅ स्वागत! पूरा भुगतान हो गया।",underpaidMsg:"⚠️ चेतावनी! कम भुगतान। शिकायत करें।",voiceBtn:"सुनें",alertTitle:"कम भुगतान",alertText:"शिकायत करें →",progressLabel:"भुगतान",qrVerif:"Blockchain",qrInvoice:"Invoice",disputeBtn:"DTDO को शिकायत",noHistory:"कोई भुगतान नहीं",season:"सीज़न"},
+    en:{entitled:"Entitled",received:"Received",shortfall:"Shortfall",historyTitle:"Payment History",paidMsg:"✅ Your full payment has been received.",underpaidMsg:"⚠️ Underpayment detected. Please file a complaint.",voiceBtn:"Listen",alertTitle:"Underpayment",alertText:"File complaint →",progressLabel:"Payment",qrVerif:"Blockchain",qrInvoice:"Invoice",disputeBtn:"File Complaint → DTDO",noHistory:"No payments recorded",season:"Season"}
+};
+const PRODUCE_ICONS={"Tendu Leaves":"🍃","Bamboo":"🎋","Mahua Flowers":"🌸","Amla":"🫐"};
+let currentLang="gu",familyData=null,historyData=null,familyAddr="",verifUrl="",invoiceUrl="";
+function polToINR(p){return"₹"+(parseFloat(p)*POL_TO_INR).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2})}
+function shortHash(h){return h?h.slice(0,8)+"…"+h.slice(-6):""}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000)}
+
+async function loadFamilyData(){
+    const params=new URLSearchParams(window.location.search);
+    familyAddr=params.get("addr")||"";
+    if(!familyAddr){loadDemoData();return}
+    try{
+        const provider=new ethers.providers.JsonRpcProvider(AMOY_RPC);
+        const contract=new ethers.Contract(CONTRACT_ADDRESS,ABI,provider);
+        const d=await contract.getFamilyDetails(familyAddr);
+        familyData={name:d[0]||"Unknown",village:d[1]||"—",entitledPOL:Number(d[2])/1e18,receivedPOL:Number(d[3])/1e18,shortfallPOL:Number(d[4])/1e18,produce:"Tendu Leaves"};
+        try{const [a,t,o,s]=await contract.getPaymentHistory(familyAddr);historyData={amounts:a,timestamps:t,officers:o,seasons:s};}catch(e){historyData=null;}
+        renderData();renderHistory();
+    }catch(e){console.error(e);loadDemoData();}
+    document.getElementById('loadingOverlay').classList.add('hidden');
+}
+
+function loadDemoData(){
+    familyAddr=familyAddr||"0x58AA48529a4f0c72F3DA3d5b47e3e55dc69e8621";
+    familyData={name:"Jadav Divyaraj",village:"Khambhat",entitledPOL:1000,receivedPOL:500,shortfallPOL:500,produce:"Tendu Leaves"};
+    historyData={amounts:[BigInt("500000000000000000000")],timestamps:[BigInt(Math.floor(Date.now()/1000)-86400)],officers:["0xDem0OfficerAddress12345678901234"],seasons:[BigInt(2024)]};
+    renderData();renderHistory();
+    document.getElementById('loadingOverlay').classList.add('hidden');
+    showToast("Demo Mode — real data loads when scanned from enrolled family");
+}
+
+function renderData(){
+    const f=familyData,L=LANG[currentLang];
+    const isPaid=f.shortfallPOL<0.001;
+    const pct=f.entitledPOL>0?Math.min(100,(f.receivedPOL/f.entitledPOL)*100):0;
+    const hero=document.getElementById('statusHero');
+    hero.className='status-hero '+(isPaid?'paid':'shortfall');
+    document.getElementById('statusIcon').textContent=isPaid?'✅':'⚠️';
+    document.getElementById('statusName').textContent=f.name;
+    document.getElementById('statusVillage').textContent=f.village+' · '+(f.produce||'Tendu Leaves');
+    document.getElementById('statusMsg').textContent=isPaid?L.paidMsg:L.underpaidMsg;
+    document.getElementById('voiceBtnText').textContent=L.voiceBtn;
+    document.getElementById('labelEntitled').textContent=L.entitled;
+    document.getElementById('amountEntitled').textContent=polToINR(f.entitledPOL);
+    document.getElementById('polEntitled').textContent=f.entitledPOL.toFixed(2)+" POL";
+    document.getElementById('labelReceived').textContent=L.received;
+    document.getElementById('amountReceived').textContent=polToINR(f.receivedPOL);
+    document.getElementById('polReceived').textContent=f.receivedPOL.toFixed(2)+" POL";
+    document.getElementById('progressLabelLeft').textContent=L.progressLabel;
+    document.getElementById('progressLabelRight').textContent=pct.toFixed(0)+"%";
+    document.getElementById('progressBar').style.width=pct.toFixed(0)+"%";
+    document.getElementById('progressPct').textContent=f.receivedPOL.toFixed(2)+" / "+f.entitledPOL.toFixed(2)+" POL";
+    if(!isPaid){
+        document.getElementById('shortfallGrid').style.display='grid';
+        document.getElementById('labelShortfall').textContent=L.shortfall;
+        document.getElementById('amountShortfall').textContent=polToINR(f.shortfallPOL);
+        document.getElementById('polShortfall').textContent=f.shortfallPOL.toFixed(2)+" POL";
+        document.getElementById('underpayAlert').classList.add('show');
+        document.getElementById('alertTitle').textContent=L.alertTitle;
+        document.getElementById('alertText').textContent=L.alertText;
+    }else{document.getElementById('shortfallGrid').style.display='none';document.getElementById('underpayAlert').classList.remove('show');}
+    const produce=f.produce||"Tendu Leaves";
+    document.getElementById('produceIcon').textContent=PRODUCE_ICONS[produce]||'🌿';
+    document.getElementById('produceName').textContent=produce;
+    document.getElementById('produceQty').textContent=(f.entitledPOL/45*1000).toFixed(0)+" kg";
+    document.getElementById('historyTitle').textContent=L.historyTitle;
+    document.getElementById('qrVerifTitle').textContent=L.qrVerif;
+    document.getElementById('qrInvoiceTitle').textContent=L.qrInvoice;
+    document.getElementById('disputeBtnText').textContent=L.disputeBtn;
+    document.getElementById('proofContract').textContent=shortHash(CONTRACT_ADDRESS);
+    document.getElementById('polygonscanLink').href='https://amoy.polygonscan.com/address/'+CONTRACT_ADDRESS+'?a='+familyAddr;
+    verifUrl='https://amoy.polygonscan.com/address/'+CONTRACT_ADDRESS+'?a='+familyAddr;
+    invoiceUrl=window.location.href.split('?')[0]+'?addr='+familyAddr;
+    generateQR('qrVerification',verifUrl,110);
+    generateQR('qrInvoice',invoiceUrl,110);
+}
+
+function renderHistory(){
+    const card=document.getElementById('historyCard'),L=LANG[currentLang];
+    card.innerHTML='';
+    if(!historyData||!historyData.amounts||historyData.amounts.length===0){card.innerHTML='<div class="no-history">'+L.noHistory+'</div>';return;}
+    const{amounts,timestamps,officers,seasons}=historyData;
+    for(let i=amounts.length-1;i>=0;i--){
+        const amtPOL=Number(amounts[i])/1e18;
+        const ts=new Date(Number(timestamps[i])*1000);
+        const dateStr=ts.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+        const row=document.createElement('div');row.className='history-row';
+        row.innerHTML='<div><div class="history-season">'+L.season+' '+seasons[i]+'</div><div class="history-date">'+dateStr+'</div><div class="history-officer">👤 '+shortHash(officers[i])+'</div></div><div style="text-align:right"><div class="history-inr">'+polToINR(amtPOL)+'</div><div class="history-pol">'+amtPOL.toFixed(4)+' POL</div></div>';
+        card.appendChild(row);
+    }
+}
+
+function generateQR(id,url,size){
+    const c=document.getElementById(id);c.innerHTML='';
+    try{new QRCode(c,{text:url,width:size,height:size,colorDark:'#0a1a0f',colorLight:'#ffffff'});}
+    catch(e){c.innerHTML='<span style="font-size:10px;color:#888;">QR error</span>';}
+}
+
+function setLang(lang){
+    currentLang=lang;
+    document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('on'));
+    document.querySelector('.lang-btn[onclick="setLang(\''+lang+'\')"]').classList.add('on');
+    if(familyData){renderData();renderHistory();}
+}
+
+function speakData(){
+    if(!familyData){showToast("Data not loaded");return;}
+    if('speechSynthesis' in window){
+        window.speechSynthesis.cancel();
+        const f=familyData,L=LANG[currentLang],isPaid=f.shortfallPOL<0.001;
+        let text;
+        if(currentLang==='gu') text='નમસ્તે '+f.name+'. ગામ '+f.village+'. હક્ક '+polToINR(f.entitledPOL)+'. '+(isPaid?'સંપૂર્ણ ચૂકવણ '+polToINR(f.receivedPOL)+' મળ્યા.':'ફક્ત '+polToINR(f.receivedPOL)+' મળ્યા. '+polToINR(f.shortfallPOL)+' ઓછા. ફરિયાદ કરો.');
+        else if(currentLang==='hi') text='नमस्ते '+f.name+'. गाँव '+f.village+'. हक '+polToINR(f.entitledPOL)+'. '+(isPaid?'पूरा भुगतान '+polToINR(f.receivedPOL)+' मिला।':'सिर्फ '+polToINR(f.receivedPOL)+' मिले। '+polToINR(f.shortfallPOL)+' कम। शिकायत करें।');
+        else text='Hello '+f.name+'. Village '+f.village+'. Entitled '+polToINR(f.entitledPOL)+'. '+(isPaid?'Full payment '+polToINR(f.receivedPOL)+' received.':'Only '+polToINR(f.receivedPOL)+' received. Shortfall '+polToINR(f.shortfallPOL)+'. File complaint.');
+        const utt=new SpeechSynthesisUtterance(text);
+        utt.lang=currentLang==='gu'?'gu-IN':currentLang==='hi'?'hi-IN':'en-IN';utt.rate=0.85;
+        const btn=document.getElementById('voiceBtn');btn.classList.add('speaking');
+        utt.onend=()=>btn.classList.remove('speaking');
+        window.speechSynthesis.speak(utt);
+    }else showToast("Voice not supported");
+}
+
+function copyLink(type){
+    const url=type==='verif'?verifUrl:invoiceUrl;
+    if(!url){showToast("Load data first");return;}
+    navigator.clipboard.writeText(url).then(()=>showToast("Copied!")).catch(()=>showToast("Copy failed"));
+}
+
+function openDispute(){
+    const base=window.location.href.replace(/family\.html.*/,'index.html');
+    window.location.href=base+(familyData?'?page=dispute&wallet='+familyAddr:'');
+}
+
+loadFamilyData();
+</script>
+</body>
+</html>
